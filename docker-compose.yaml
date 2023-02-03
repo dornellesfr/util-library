@@ -1,0 +1,54 @@
+version: '3'
+services:
+
+  database:
+    image: "mongo:4"
+    ports:
+      - 27017:27017
+    container_name: database_UL
+    networks:
+      - util-library-net
+    volumes:
+      - mongo-data:data/db
+    restart: always
+  
+  backend:
+    build:
+      context: ./app/backend
+      dockerfile: Dockerfile.dev
+    ports:
+      - 3080:3080
+    container_name: backend_UL
+    networks:
+      - util-library-net
+    volumes:
+      - ./app/backend/src:usr/app/src
+    depends_on:
+      - database
+    restart: always
+
+  frontend:
+    build:
+      context: ./app/frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - 3000:3000
+    container_name: frontend_UL
+    networks:
+      - util-library-net
+    volumes:
+      - ./app/frontend/src:usr/app/src
+      - ./app/frontend/public:usr/app/public
+    depends_on:
+      - backend
+    stdin_open: true
+    tty: true
+    restart: always
+
+  networks:
+    util-library-net:
+      driver: bridge
+
+  volumes:
+    mongo-data:
+      driver: local
