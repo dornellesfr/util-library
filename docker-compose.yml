@@ -1,0 +1,49 @@
+version: '3'
+services:
+  front:
+    build: ./frontend/
+    container_name: library_front
+    tty: true
+    stdin_open: true
+    command: npm start
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+    restart: always
+
+  api:
+    build: ./backend/
+    container_name: library_api
+    tty: true
+    stdin_open: true
+    command: bash
+    working_dir: /app
+    volumes:
+      - ./backend:/app
+    ports:
+      - "3001:3001"
+    depends_on:
+      - mongodb
+    restart: always
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/library
+
+  mongodb:
+    image: mongo:5.0.7
+    container_name: library_db
+    volumes:
+      - ./:/app
+    restart: always
+    ports:
+      - 27017:27017
+
+# Lista de redes que os containeres irão utilizar
+networks:
+  # Rede padrão, criada automaticamente
+  default:
+    # Dá um nome específico à rede padrão
+    name: library_net
